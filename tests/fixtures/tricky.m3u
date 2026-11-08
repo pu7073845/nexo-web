@@ -1,0 +1,32 @@
+#=================================
+# 📡 Lista M3U de prueba
+# 🕒 Last Updated: 2026-11-07 07:38:42 AM
+# 📺 Status: Checked
+#==================================
+#EXTM3U
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/1.png",6h00 Equipo Á vs Equipo B 1 SEÑAL 3
+acestream://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/2.png",6h00 Equipo Á vs Equipo B 2 CANAL 5 50FPS
+acestream://bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/3.png",19h00 Equipo Ñ vs Equipo 98 1 CANAL 1
+acestream://cccccccccccccccccccccccccccccccccccccccc
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/4.png",19h00 Equipo Ñ vs Equipo 98 2 CANAL 1 4K
+acestream://dddddddddddddddddddddddddddddddddddddddd
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/5.png",19h30 EQUIPO C vs EQUIPO D 2 CANAL 1 🇵🇹
+acestream://eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/6.png",21h30 Equipo 05 vs Equipo E 1 CANAL 2
+acestream://ffffffffffffffffffffffffffffffffffffffff
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/7.png",23h30 Equipo F vs Equipo G 1 SEÑAL TV
+acestream://gggggggggggggggggggggggggggggggggggggggg
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/8.png",0h00 Equipo H vs Equipo I 1 SEÑAL 1
+acestream://hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/9.png",3h00 Equipo J vs Equipo K 5 CANAL 2 🇩🇪
+acestream://iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+#EXTINF:-1 group-title="Directos" tvg-logo="https://example.com/10.png",Thanks for upload test-list!
+acestream://jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+#EXTINF:-1 group-title="General" tvg-logo="https://example.com/11.png",CANAL NOTICIAS
+acestream://kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+#EXTINF:-1 group-title="General" tvg-logo="https://example.com/12.png",CANAL 2 🇨🇿
+acestream://llllllllllllllllllllllllllllllllllllllll
+#EXTINF:-1 group-title="4K" tvg-logo="https://example.com/13.png",CANAL 3 4K 🇵🇱
+acestream://mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
