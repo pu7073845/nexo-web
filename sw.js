@@ -1,6 +1,6 @@
 /* Service worker de Nexo Web: app shell disponible sin conexión. */
 
-const CACHE_NAME = 'nexo-web-shell-v1.0.0';
+const CACHE_NAME = 'nexo-web-shell-v1.0.1';
 
 const APP_SHELL = [
   './',

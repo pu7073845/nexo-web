@@ -230,7 +230,8 @@ export function parsePlaylist(text, options = {}) {
     throw new PlaylistParseError('La lista no contiene emisiones.');
   }
 
-  const updatedAt = parseUpdatedAt(text) ?? nowWallClockTs(options.now || new Date());
+  const parsedUpdatedAt = parseUpdatedAt(text);
+  const updatedAt = parsedUpdatedAt ?? nowWallClockTs(options.now || new Date());
 
   const timedEntries = [];
   const channelEntries = [];
@@ -330,6 +331,7 @@ export function parsePlaylist(text, options = {}) {
 
   return {
     updatedAt,
+    hasUpdatedAt: parsedUpdatedAt !== null,
     updatedAtDisplay: updatedAt + DISPLAY_OFFSET_MS,
     matches,
     channels,

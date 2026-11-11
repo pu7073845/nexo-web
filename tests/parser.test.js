@@ -179,6 +179,25 @@ test('separa canales sueltos y respeta el orden de grupos', () => {
   assert.equal(playlist.channels[1].name, 'CANAL 2 🇨🇿');
 });
 
+test('indica si la lista trae fecha de actualización', () => {
+  assert.equal(playlist.hasUpdatedAt, true);
+
+  const withoutHeader = parsePlaylist(
+    '#EXTM3U\n#EXTINF:-1 group-title="General",CANAL 1\nhttps://example.com/stream/1.m3u8',
+  );
+  assert.equal(withoutHeader.hasUpdatedAt, false);
+});
+
+test('acepta listas solo de canales', () => {
+  const channelsOnly = parsePlaylist(
+    '#EXTM3U\n#EXTINF:-1 group-title="General",CANAL 1\nhttps://example.com/stream/1.m3u8',
+  );
+
+  assert.equal(channelsOnly.matches.length, 0);
+  assert.equal(channelsOnly.channelGroups.length, 1);
+  assert.equal(channelsOnly.stats.channelCount, 1);
+});
+
 test('rechaza contenido que no es M3U', () => {
   assert.throws(
     () => parsePlaylist('<html>no soy una lista</html>'),

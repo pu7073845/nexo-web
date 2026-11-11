@@ -61,6 +61,16 @@
         </div>
       </div>
 
+      <div id="stale-banner" class="banner" role="status" aria-live="polite" hidden>
+        <div class="banner-inner">
+          <svg class="banner-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 8v5M12 16.5v.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            <path d="M10.3 4.6 2.8 18a2 2 0 0 0 1.76 3h14.88a2 2 0 0 0 1.76-3L13.7 4.6a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+          <p id="stale-message" class="banner-text"></p>
+        </div>
+      </div>
+
       <nav id="tabs" class="tabs" role="tablist" aria-label="Secciones" hidden>
         <button id="tab-matches" class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-matches" data-tab="matches">
           Eventos <span id="matches-count" class="tab-count">0</span>

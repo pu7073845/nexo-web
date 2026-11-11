@@ -1,5 +1,5 @@
 import { parsePlaylist, PlaylistParseError } from './parser.js';
-import { formatKickoff, formatUpdated, localDayKeys } from './time.js';
+import { formatKickoff, formatUpdated, filterUpcomingMatches, isPlaylistStale, localDayKeys } from './time.js';
 import {
   clearCache,
   clearSource,
@@ -46,6 +46,8 @@ const elements = {
   errorMessage: document.getElementById('error-message'),
   errorRetry: document.getElementById('error-retry'),
   errorClose: document.getElementById('error-close'),
+  staleBanner: document.getElementById('stale-banner'),
+  staleMessage: document.getElementById('stale-message'),
   tabs: document.getElementById('tabs'),
   tabMatches: document.getElementById('tab-matches'),
   tabChannels: document.getElementById('tab-channels'),
@@ -108,6 +110,17 @@ function clearFormError(element) {
 function updateChrome() {
   const hasSource = Boolean(state.sourceUrl);
   const playlist = state.playlist;
+  const hasMatches = Boolean(playlist && playlist.matches.length > 0);
+  const upcomingMatches = playlist ? filterUpcomingMatches(playlist.matches) : [];
+  const upcomingLinks = upcomingMatches.reduce(
+    (total, match) => total + match.sources.length,
+    0,
+  );
+  const showMatches = hasSource && hasMatches && state.tab === 'matches';
+  const stale = Boolean(playlist && isPlaylistStale(playlist));
+  const hiddenPastCount = playlist
+    ? Math.max(0, playlist.matches.length - upcomingMatches.length)
+    : 0;
 
   elements.sourceSetup.hidden = hasSource;
   elements.tabs.hidden = !hasSource;
@@ -115,7 +128,7 @@ function updateChrome() {
   elements.refreshBtn.classList.toggle('is-loading', state.loading);
   elements.refreshBtn.setAttribute('aria-busy', String(state.loading));
 
-  elements.matchesCount.textContent = playlist ? String(playlist.stats.matchCount) : '0';
+  elements.matchesCount.textContent = playlist ? String(upcomingMatches.length) : '0';
   elements.channelsCount.textContent = playlist ? String(playlist.stats.channelCount) : '0';
 
   if (!hasSource) {
@@ -125,10 +138,16 @@ function updateChrome() {
       ? 'Actualizando la lista…'
       : 'Descargando la lista…';
   } else if (playlist) {
-    elements.statusLine.textContent =
-      `${pluralize(playlist.stats.matchCount, 'evento', 'eventos')} · ` +
-      `${pluralize(playlist.stats.sourceCount, 'enlace', 'enlaces')} · ` +
-      `Lista ${formatUpdated(playlist.updatedAt)}`;
+    const parts = [];
+    if (hasMatches) {
+      parts.push(pluralize(upcomingMatches.length, 'evento', 'eventos'));
+      parts.push(pluralize(upcomingLinks, 'enlace', 'enlaces'));
+    }
+    parts.push(pluralize(playlist.stats.channelCount, 'canal', 'canales'));
+    if (playlist.hasUpdatedAt) {
+      parts.push(`Lista ${formatUpdated(playlist.updatedAt)}`);
+    }
+    elements.statusLine.textContent = parts.join(' · ');
   } else {
     elements.statusLine.textContent = state.error
       ? 'No se pudo cargar la lista'
@@ -145,8 +164,22 @@ function updateChrome() {
   elements.loadingState.hidden = !(hasSource && state.loading && !playlist);
   elements.failureState.hidden = !(hasSource && !playlist && !state.loading && !!state.error);
 
-  elements.panelMatches.hidden = !hasSource || state.tab !== 'matches';
-  elements.panelChannels.hidden = !hasSource || state.tab !== 'channels';
+  elements.tabMatches.hidden = !hasMatches;
+  elements.panelMatches.hidden = !hasSource || !showMatches;
+  elements.panelChannels.hidden = !hasSource || showMatches;
+
+  elements.tabMatches.setAttribute('aria-selected', String(showMatches));
+  elements.tabChannels.setAttribute('aria-selected', String(!showMatches));
+  elements.tabMatches.tabIndex = showMatches ? 0 : -1;
+  elements.tabChannels.tabIndex = showMatches ? -1 : 0;
+
+  elements.staleBanner.hidden = !hasSource || !stale;
+  if (stale) {
+    const updated = formatUpdated(playlist.updatedAt);
+    elements.staleMessage.textContent = hiddenPastCount > 0
+      ? `Lista desactualizada · Última actualización ${updated} · Se ocultaron ${pluralize(hiddenPastCount, 'evento', 'eventos')} anteriores a hoy.`
+      : `Lista desactualizada · Última actualización ${updated}.`;
+  }
 
   if (!hasSource) {
     elements.matchesEmpty.hidden = true;
@@ -194,9 +227,10 @@ function renderMatches() {
   }
 
   const { today, tomorrow } = localDayKeys();
+  const upcomingMatches = filterUpcomingMatches(playlist.matches);
   const fragment = document.createDocumentFragment();
 
-  for (const match of playlist.matches) {
+  for (const match of upcomingMatches) {
     const kickoff = formatKickoff(match.displayTs, today, tomorrow);
 
     const card = document.createElement('article');
@@ -241,7 +275,19 @@ function renderMatches() {
   }
 
   elements.matchesList.append(fragment);
-  elements.matchesEmpty.hidden = playlist.matches.length !== 0;
+
+  const emptyTitle = elements.matchesEmpty.querySelector('.state-title');
+  const emptyText = elements.matchesEmpty.querySelector('.state-text');
+
+  if (playlist.matches.length > 0) {
+    emptyTitle.textContent = 'No hay eventos próximos';
+    emptyText.textContent = 'La lista no contiene eventos para hoy o fechas posteriores.';
+  } else {
+    emptyTitle.textContent = 'No hay eventos en la lista';
+    emptyText.textContent = 'Prueba a recargar la lista con el botón de arriba.';
+  }
+
+  elements.matchesEmpty.hidden = upcomingMatches.length !== 0;
 }
 
 function renderChannels() {
@@ -314,14 +360,8 @@ function render() {
 }
 
 function switchTab(tab) {
-  const showMatches = tab === 'matches';
-  state.tab = tab;
-
-  elements.tabMatches.setAttribute('aria-selected', String(showMatches));
-  elements.tabChannels.setAttribute('aria-selected', String(!showMatches));
-  elements.tabMatches.tabIndex = showMatches ? 0 : -1;
-  elements.tabChannels.tabIndex = showMatches ? -1 : 0;
-
+  const hasMatches = Boolean(state.playlist && state.playlist.matches.length > 0);
+  state.tab = tab === 'matches' && hasMatches ? 'matches' : 'channels';
   updateChrome();
 }
 
@@ -453,13 +493,21 @@ async function loadPlaylist() {
 
     const playlist = parsePlaylist(text);
 
-    if (playlist.matches.length === 0) {
-      throw new PlaylistParseError('No se encontraron eventos.');
+    if (playlist.matches.length === 0 && playlist.channels.length === 0) {
+      throw new PlaylistParseError('No se encontraron eventos ni canales.');
     }
 
+    const hadMatches = Boolean(state.playlist && state.playlist.matches.length > 0);
     state.playlist = playlist;
     state.fetchedAt = Date.now();
     state.error = null;
+
+    if (playlist.matches.length === 0) {
+      state.tab = 'channels';
+    } else if (!hadMatches) {
+      state.tab = 'matches';
+    }
+
     saveCache(text, state.fetchedAt);
   } catch (error) {
     if (token !== loadToken) return;
@@ -513,6 +561,7 @@ function applySourceUrl(url) {
     state.error = null;
     state.loading = false;
     state.search = '';
+    state.tab = 'matches';
     elements.channelSearch.value = '';
     clearCache();
   }
@@ -570,7 +619,10 @@ function init() {
     clearCache();
   }
 
-  switchTab('matches');
+  state.tab = state.playlist && state.playlist.matches.length === 0
+    ? 'channels'
+    : 'matches';
+  switchTab(state.tab);
   render();
 
   elements.refreshBtn.addEventListener('click', () => {

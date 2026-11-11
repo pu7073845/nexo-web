@@ -22,7 +22,11 @@ https://pu7073845.github.io/nexo-web/
 - Guardar la fuente y la última lista válida en `localStorage`.
 - Botón de recarga para volver a descargar la fuente.
 - Pestaña **Eventos**: tarjetas agrupadas por evento y hora.
+- Se ocultan los eventos anteriores al día actual.
+- Aviso de **lista desactualizada** con la fecha de `Last Updated`.
+- Indicación de cuántos eventos antiguos se han ocultado.
 - Pestaña **Canales**: canales sueltos agrupados por categoría, con buscador.
+- Listas que solo contienen canales: se abre directamente Canales y se oculta Eventos.
 - Cada enlace ofrece **Abrir en Ace Stream** y **Copiar**.
 - Aviso si falla la descarga; se mantiene la última lista válida.
 - Diseño oscuro responsive, adaptado a móvil y escritorio.
@@ -51,6 +55,8 @@ defecto.
   `acestream://` en una app compatible o lo copia al portapapeles.
 - **Disponibilidad**: la lista y los enlaces son de terceros y pueden dejar de
   funcionar.
+- **Eventos pasados**: no se muestran. Si toda la lista es antigua, Eventos
+  aparece vacío y se muestra el aviso de lista desactualizada.
 
 ## Horas
 

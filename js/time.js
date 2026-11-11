@@ -202,6 +202,39 @@ export function formatUpdated(updatedWallTs) {
 }
 
 /**
+ * Devuelve solo los eventos cuyo día visible es hoy o posterior.
+ *
+ * @param {Array<{displayTs:number}>} matches
+ * @param {Date} [now]
+ * @returns {Array<object>}
+ */
+export function filterUpcomingMatches(matches, now = new Date()) {
+  if (!Array.isArray(matches)) return [];
+
+  const { today } = localDayKeys(now);
+  return matches.filter((match) => {
+    if (!Number.isFinite(match?.displayTs)) return false;
+    return dateKey(wallClockParts(match.displayTs)) >= today;
+  });
+}
+
+/**
+ * Indica si la cabecera Last Updated es anterior al día local actual.
+ *
+ * @param {{hasUpdatedAt:boolean, updatedAtDisplay:number}|null} playlist
+ * @param {Date} [now]
+ * @returns {boolean}
+ */
+export function isPlaylistStale(playlist, now = new Date()) {
+  if (!playlist?.hasUpdatedAt || !Number.isFinite(playlist.updatedAtDisplay)) {
+    return false;
+  }
+
+  const { today } = localDayKeys(now);
+  return dateKey(wallClockParts(playlist.updatedAtDisplay)) < today;
+}
+
+/**
  * Fecha y hora completas, por si se necesitan en el futuro.
  *
  * @param {number} displayTs
